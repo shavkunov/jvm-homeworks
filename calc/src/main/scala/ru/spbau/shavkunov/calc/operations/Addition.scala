@@ -2,11 +2,9 @@ package ru.spbau.shavkunov.calc.operations
 
 import ru.spbau.shavkunov.calc.Token
 
-class Addition extends Operator {
+object Addition extends Operator {
 
-  override def getPrecedence: Int = {
-    return 1
-  }
+  override def getPrecedence: Int = 2
 
   override def apply(tokens: List[Double]): Double = {
     var result: Double = 0
@@ -17,8 +15,8 @@ class Addition extends Operator {
     return result
   }
 
-  override def getArity: Int = {
-    return 2
-  }
+  override def getArity: Int = 2
+
+  override def getAssociative = Associative.Left
 
 }

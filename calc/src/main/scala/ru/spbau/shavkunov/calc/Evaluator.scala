@@ -18,7 +18,8 @@ class Evaluator {
         }
 
         case TokenType.Operator => {
-          while (operatorsStack.nonEmpty && operatorsStack.top.operator.getPrecedence >= token.operator.getPrecedence) {
+          while (operatorsStack.nonEmpty &&
+                 operatorsStack.top.operator.getPrecedence >= token.operator.getPrecedence) {
             postfixNotation += operatorsStack.pop()
           }
 
@@ -68,6 +69,9 @@ class Evaluator {
           for (iteration <- 1 to token.operator.getArity) {
             operands += resultingStack.pop()
           }
+
+          // stack changes order of operands
+          operands = operands.reverse
 
           val result = token.operator.apply(operands.toList)
           resultingStack.push(result)

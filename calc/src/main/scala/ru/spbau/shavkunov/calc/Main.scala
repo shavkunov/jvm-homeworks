@@ -1,13 +1,14 @@
 package ru.spbau.shavkunov.calc
 
+import scala.io.StdIn
+
 object Main {
 
   def main(args: Array[String]): Unit = {
-    val expression = "5 + (5 + 5) + (((5) + (5 + 5)))"
-
+    Console.print("Enter expression:\n")
 
     val evaluator = new Evaluator()
-    println(evaluator.eval(expression))
+    Console.print(evaluator.eval(StdIn.readLine()))
   }
 
 }

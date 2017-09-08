@@ -7,7 +7,7 @@ class Parser() {
   val numberPattern = "\\d+".r
   val leftBracketPattern = "\\(".r
   val rightBracketPattern = "\\)".r
-  val operatorPattern = "[+-/*]".r
+  val operatorPattern = "[+-/*]|exp".r
   val patterns = List(numberPattern, leftBracketPattern, rightBracketPattern, operatorPattern)
 
   def parse(expression: String): mutable.MutableList[Token] = {
@@ -28,10 +28,10 @@ class Parser() {
 
         var token: Token = null
         if (value != emptyMatch) {
-          value.charAt(0) match {
+          value match {
             case this.leftBracketPattern(_*) => token = new Token(TokenType.LeftBracket, value)
-            case this.numberPattern(_*) => token = new Token(TokenType.Number, value)
             case this.rightBracketPattern(_*) => token = new Token(TokenType.RightBracket, value)
+            case this.numberPattern(_*) => token = new Token(TokenType.Number, value)
             case this.operatorPattern(_*) => token = new Token(TokenType.Operator, value)
           }
 
