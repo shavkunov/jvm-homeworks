@@ -1,6 +1,9 @@
 package ru.spbau.shavkunov.calc.operations
 
-object Substraction extends Operator {
+/**
+  * Substracting numbers
+  */
+object Substraction extends Operation {
 
   override def getAssociative = Associative.Left
 

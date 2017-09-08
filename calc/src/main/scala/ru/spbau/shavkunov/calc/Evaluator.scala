@@ -3,10 +3,18 @@ package ru.spbau.shavkunov.calc
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
+/**
+  * Class provides evaluation of arithmetic expressions
+  */
 class Evaluator {
   val parser = new Parser()
 
-  private def getPostfixNotation(tokens: mutable.MutableList[Token]): List[Token] = {
+  /**
+    * Creating reverse polish notation(postfix notation) of tokens
+    * @param tokens arithmetic tokens
+    * @return postfix notation
+    */
+  private def getPostfixNotation(tokens: List[Token]): List[Token] = {
     var postfixNotation = mutable.ListBuffer[Token]()
     val operatorsStack = mutable.Stack[Token]()
 
@@ -17,9 +25,9 @@ class Evaluator {
           postfixNotation += token
         }
 
-        case TokenType.Operator => {
+        case TokenType.Operation => {
           while (operatorsStack.nonEmpty &&
-                 operatorsStack.top.operator.getPrecedence >= token.operator.getPrecedence) {
+                 operatorsStack.top.operation.getPrecedence >= token.operation.getPrecedence) {
             postfixNotation += operatorsStack.pop()
           }
 
@@ -50,6 +58,11 @@ class Evaluator {
     return postfixNotation.toList
   }
 
+  /**
+    * Calculation result of postfix notation
+    * @param postfix postfix notation of arithmetic expression
+    * @return result of calculating
+    */
   private def evaluateAnswer(postfix: List[Token]): Double = {
     val resultingStack = mutable.Stack[Double]()
 
@@ -63,17 +76,17 @@ class Evaluator {
           resultingStack.push(token.value.toDouble)
         }
 
-        case TokenType.Operator => {
+        case TokenType.Operation => {
           var operands = new ListBuffer[Double]()
 
-          for (iteration <- 1 to token.operator.getArity) {
+          for (iteration <- 1 to token.operation.getArity) {
             operands += resultingStack.pop()
           }
 
           // stack changes order of operands
           operands = operands.reverse
 
-          val result = token.operator.apply(operands.toList)
+          val result = token.operation.apply(operands.toList)
           resultingStack.push(result)
         }
       }
@@ -82,6 +95,11 @@ class Evaluator {
     return resultingStack.pop()
   }
 
+  /**
+    * Evaluation of arithmetic expression
+    * @param expression arithmetic expression
+    * @return result of calculating
+    */
   def eval(expression: String): Double = {
     val tokens = parser.parse(expression)
     val postfix = getPostfixNotation(tokens)

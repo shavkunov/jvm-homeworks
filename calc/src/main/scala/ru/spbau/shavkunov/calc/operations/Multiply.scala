@@ -1,6 +1,9 @@
 package ru.spbau.shavkunov.calc.operations
 
-object Multiply extends Operator {
+/**
+  * Multiplying numbers
+  */
+object Multiply extends Operation {
 
   override def getAssociative = Associative.Left
 

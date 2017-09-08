@@ -1,6 +1,9 @@
 package ru.spbau.shavkunov.calc.operations
 
-object Exponent extends Operator {
+/**
+  * Calculation of exponent
+  */
+object Exponent extends Operation {
 
   override def getAssociative = Associative.Left
 

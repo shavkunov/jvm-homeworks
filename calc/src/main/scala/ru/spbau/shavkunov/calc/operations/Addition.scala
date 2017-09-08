@@ -2,7 +2,10 @@ package ru.spbau.shavkunov.calc.operations
 
 import ru.spbau.shavkunov.calc.Token
 
-object Addition extends Operator {
+/**
+  * Adding numbers operation
+  */
+object Addition extends Operation {
 
   override def getPrecedence: Int = 2
 

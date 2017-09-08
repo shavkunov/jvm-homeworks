@@ -1,6 +1,9 @@
 package ru.spbau.shavkunov.calc.operations
 
-object Divide extends Operator {
+/**
+  * Dividing numbers operation
+  */
+object Divide extends Operation {
 
   override def getPrecedence: Int = 3
 
