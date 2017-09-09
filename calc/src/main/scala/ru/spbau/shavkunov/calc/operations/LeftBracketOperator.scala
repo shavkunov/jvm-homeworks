@@ -1,18 +1,18 @@
 package ru.spbau.shavkunov.calc.operations
 
 /**
-  * Substracting numbers
+  * Left bracket as a operator
   */
-object Substraction extends Operator {
+object LeftBracketOperator extends Operator {
 
   override def getAssociative = Associative.Left
 
-  override def getArity = 2
+  override def getArity = 0
 
-  override def getPrecedence = 2
+  override def getPrecedence = 1
 
   override def apply(tokens: List[Double]): Double = {
-    return tokens.head - tokens(1)
+    return 0
   }
 
 }

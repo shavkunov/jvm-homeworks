@@ -1,6 +1,6 @@
-package ru.spbau.shavkunov.calc
+package ru.spbau.shavkunov.calc.evaluation
 
-import ru.spbau.shavkunov.calc.TokenType.TokenType
+import ru.spbau.shavkunov.calc.evaluation.TokenType.TokenType
 import ru.spbau.shavkunov.calc.operations._
 
 /**
@@ -10,14 +10,15 @@ import ru.spbau.shavkunov.calc.operations._
   */
 class Token(var tokenType: TokenType, var value: String) {
   // field is not null when token's type is operator
-  var operation: Operation = null
-  if (tokenType == TokenType.Operation) {
+  var operator: Operator = null
+  if (tokenType == TokenType.Operator || tokenType == TokenType.LeftBracket) {
     value match {
-      case "+" => operation = Addition
-      case "-" => operation = Substraction
-      case "/" => operation = Divide
-      case "*" => operation = Multiply
-      case "exp" => operation = Exponent
+      case "+" => operator = Addition
+      case "−" => operator = Substraction
+      case "/" => operator = Divide
+      case "*" => operator = Multiply
+      case "exp" => operator = Exponent
+      case _ => operator = LeftBracketOperator
     }
   }
 

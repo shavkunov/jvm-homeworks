@@ -3,7 +3,7 @@ package ru.spbau.shavkunov.calc.operations
 /**
   * Calculation of exponent
   */
-object Exponent extends Operation {
+object Exponent extends Operator {
 
   override def getAssociative = Associative.Left
 

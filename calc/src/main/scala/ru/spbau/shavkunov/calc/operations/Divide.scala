@@ -3,7 +3,7 @@ package ru.spbau.shavkunov.calc.operations
 /**
   * Dividing numbers operation
   */
-object Divide extends Operation {
+object Divide extends Operator {
 
   override def getPrecedence: Int = 3
 

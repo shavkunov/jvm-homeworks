@@ -1,5 +1,7 @@
 package ru.spbau.shavkunov.calc
 
+import ru.spbau.shavkunov.calc.evaluation.Evaluator
+
 import scala.io.StdIn
 
 object Main {

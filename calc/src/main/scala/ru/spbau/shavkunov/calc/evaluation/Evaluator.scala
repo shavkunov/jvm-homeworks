@@ -1,4 +1,6 @@
-package ru.spbau.shavkunov.calc
+package ru.spbau.shavkunov.calc.evaluation
+
+import ru.spbau.shavkunov.calc.operations.Associative
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
@@ -19,15 +21,15 @@ class Evaluator {
     val operatorsStack = mutable.Stack[Token]()
 
     for (token <- tokens) {
-
       token.tokenType match {
         case TokenType.Number => {
           postfixNotation += token
         }
 
-        case TokenType.Operation => {
+        case TokenType.Operator => {
           while (operatorsStack.nonEmpty &&
-                 operatorsStack.top.operation.getPrecedence >= token.operation.getPrecedence) {
+                 operatorsStack.top.operator.getPrecedence >= token.operator.getPrecedence &&
+                 operatorsStack.top.operator.getAssociative == Associative.Left) {
             postfixNotation += operatorsStack.pop()
           }
 
@@ -76,17 +78,17 @@ class Evaluator {
           resultingStack.push(token.value.toDouble)
         }
 
-        case TokenType.Operation => {
+        case TokenType.Operator => {
           var operands = new ListBuffer[Double]()
 
-          for (iteration <- 1 to token.operation.getArity) {
+          for (iteration <- 1 to token.operator.getArity) {
             operands += resultingStack.pop()
           }
 
           // stack changes order of operands
           operands = operands.reverse
 
-          val result = token.operation.apply(operands.toList)
+          val result = token.operator.apply(operands.toList)
           resultingStack.push(result)
         }
       }

@@ -5,7 +5,7 @@ import ru.spbau.shavkunov.calc.operations.Associative.Associative
 /**
   * Interface of operation, which can be applied to it's arguments
   */
-trait Operation {
+trait Operator {
 
   /**
     * @return associative of operation

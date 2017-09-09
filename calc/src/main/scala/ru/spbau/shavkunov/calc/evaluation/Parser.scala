@@ -1,4 +1,4 @@
-package ru.spbau.shavkunov.calc
+package ru.spbau.shavkunov.calc.evaluation
 
 import scala.collection.mutable
 
@@ -8,10 +8,10 @@ import scala.collection.mutable
 class Parser() {
   // TODO : move to constants
   // these patterns supposed to match appropriate tokens
-  val numberPattern = "\\d+".r
-  val leftBracketPattern = "\\(".r
-  val rightBracketPattern = "\\)".r
-  val operatorPattern = "[+-/*]|exp".r
+  val numberPattern = raw"^(\d+)".r
+  val leftBracketPattern = raw"^\(".r
+  val rightBracketPattern = raw"^\)".r
+  val operatorPattern = raw"^([+−/*]|exp)".r
   val patterns = List(numberPattern, leftBracketPattern, rightBracketPattern, operatorPattern)
 
   /**
@@ -43,10 +43,10 @@ class Parser() {
         var token: Token = null
         if (value != emptyMatch) {
           value match {
+            case this.numberPattern(_*) => token = new Token(TokenType.Number, value)
+            case this.operatorPattern(_*) => token = new Token(TokenType.Operator, value)
             case this.leftBracketPattern(_*) => token = new Token(TokenType.LeftBracket, value)
             case this.rightBracketPattern(_*) => token = new Token(TokenType.RightBracket, value)
-            case this.numberPattern(_*) => token = new Token(TokenType.Number, value)
-            case this.operatorPattern(_*) => token = new Token(TokenType.Operation, value)
           }
 
           expression = pattern.replaceFirstIn(expression, "")

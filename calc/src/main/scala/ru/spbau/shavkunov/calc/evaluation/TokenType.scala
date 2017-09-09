@@ -1,4 +1,4 @@
-package ru.spbau.shavkunov.calc
+package ru.spbau.shavkunov.calc.evaluation
 
 /**
   * Describing kinds of tokens
@@ -14,7 +14,7 @@ object TokenType extends Enumeration {
   /**
     * One of supported operations token
     */
-  val Operation = Value
+  val Operator = Value
 
   /**
     * Left bracket

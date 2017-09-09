@@ -3,7 +3,7 @@ package ru.spbau.shavkunov.calc.operations
 /**
   * Multiplying numbers
   */
-object Multiply extends Operation {
+object Multiply extends Operator {
 
   override def getAssociative = Associative.Left
 
