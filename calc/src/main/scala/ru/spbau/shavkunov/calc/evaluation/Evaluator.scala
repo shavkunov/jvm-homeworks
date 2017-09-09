@@ -1,5 +1,6 @@
 package ru.spbau.shavkunov.calc.evaluation
 
+import ru.spbau.shavkunov.calc.exceptions.{InvalidParentException, MissingOperandException}
 import ru.spbau.shavkunov.calc.operations.Associative
 
 import scala.collection.mutable
@@ -16,7 +17,7 @@ class Evaluator {
     * @param tokens arithmetic tokens
     * @return postfix notation
     */
-  private def getPostfixNotation(tokens: List[Token]): List[Token] = {
+  def getPostfixNotation(tokens: List[Token]): List[Token] = {
     var postfixNotation = mutable.ListBuffer[Token]()
     val operatorsStack = mutable.Stack[Token]()
 
@@ -41,19 +42,25 @@ class Evaluator {
         }
 
         case TokenType.RightBracket => {
-          while (operatorsStack.top.tokenType != TokenType.LeftBracket) {
+          while (operatorsStack.nonEmpty &&
+                 operatorsStack.top.tokenType != TokenType.LeftBracket) {
             postfixNotation += operatorsStack.pop()
           }
 
+          if (operatorsStack.isEmpty) {
+            throw new InvalidParentException
+          }
           // pops left bracket
-          /* if the stack runs out without finding a left bracket, then there are
-		      mismatched parentheses. */
           operatorsStack.pop()
         }
       }
     }
 
     while (operatorsStack.nonEmpty) {
+      if (operatorsStack.top.tokenType == TokenType.LeftBracket ||
+          operatorsStack.top.tokenType == TokenType.RightBracket) {
+        throw new InvalidParentException
+      }
       postfixNotation += operatorsStack.pop()
     }
 
@@ -82,6 +89,9 @@ class Evaluator {
           var operands = new ListBuffer[Double]()
 
           for (iteration <- 1 to token.operator.getArity) {
+            if (resultingStack.isEmpty) {
+              throw new MissingOperandException
+            }
             operands += resultingStack.pop()
           }
 

@@ -4,6 +4,7 @@ import ru.spbau.shavkunov.calc.evaluation.{Parser, TokenType}
 import ru.spbau.shavkunov.calc.operations._
 
 class ParserTest extends org.scalatest.FunSuite {
+
   test("correct tokens from expression") {
     val parser = new Parser
     val list = parser.parse("1 +    2 * ( exp(100 / 4) )")
@@ -21,4 +22,5 @@ class ParserTest extends org.scalatest.FunSuite {
     assert(list(10).tokenType == TokenType.RightBracket)
     assert(list(11).tokenType == TokenType.RightBracket)
   }
+
 }

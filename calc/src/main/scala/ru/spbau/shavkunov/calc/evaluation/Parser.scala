@@ -1,5 +1,7 @@
 package ru.spbau.shavkunov.calc.evaluation
 
+import ru.spbau.shavkunov.calc.exceptions.{EmptyExpressionException, UnsupportedTypeOfExpressionException}
+
 import scala.collection.mutable
 
 /**
@@ -20,6 +22,10 @@ class Parser() {
     * @return list of tokens
     */
   def parse(expression: String): List[Token] = {
+    if (expression == "") {
+      throw new EmptyExpressionException
+    }
+
     val removedSpaces = expression.replace(" ", "")
     val tokens = tokenize(removedSpaces)
 
@@ -37,6 +43,7 @@ class Parser() {
     val emptyMatch = ""
     var expression = string
     while (expression.length > 0) {
+      var isMatched = false
       for (pattern <- patterns) {
         val value = pattern.findFirstIn(expression).getOrElse(emptyMatch)
 
@@ -51,7 +58,12 @@ class Parser() {
 
           expression = pattern.replaceFirstIn(expression, "")
           tokens += token
+          isMatched = true
         }
+      }
+
+      if (!isMatched) {
+        throw new UnsupportedTypeOfExpressionException
       }
     }
 
