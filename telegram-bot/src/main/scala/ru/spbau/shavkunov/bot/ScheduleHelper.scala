@@ -58,12 +58,20 @@ object ScheduleHelper {
     return result
   }
 
+  def getTimeInSeconds(time: String): Int = {
+    val creationTime = time.toString.split(':')
+    val creationSeconds = creationTime(0).toInt*3600 + creationTime(1).toInt*60
+
+    return creationSeconds
+  }
+
   def getClassNumber(shift: Int): Int = {
     val time = getCurrentTime()
 
     var currentClassNumber = -1
     for (lessonTime <- TimeTable.getTiming().keys) {
-      if (time >= lessonTime) {
+      val currentSeconds = getTimeInSeconds(time)
+      if (currentSeconds >= lessonTime) {
         currentClassNumber = TimeTable.getTiming()(lessonTime)
       }
     }
