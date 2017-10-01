@@ -14,7 +14,7 @@ class ScheduleTest extends org.scalatest.FunSuite {
     val today = Calendar.getInstance().getTime
     val dayFormat = new SimpleDateFormat("EEEE")
 
-    println(dayFormat.format(today))
+    println(today)
   }
 
   test("json test") {

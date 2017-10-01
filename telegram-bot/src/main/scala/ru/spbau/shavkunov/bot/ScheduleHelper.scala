@@ -24,9 +24,9 @@ object ScheduleHelper {
   }
 
   def getCurrentTime(): String = {
-    val today = Calendar.getInstance().getTime
-    val minuteFormat = new SimpleDateFormat("mm")
-    val hourFormat = new SimpleDateFormat("hh")
+    val today = Calendar.getInstance().getTime // TODO: 24 часовой формат
+    val minuteFormat = new SimpleDateFormat("MM")
+    val hourFormat = new SimpleDateFormat("HH")
 
     val currentHour = hourFormat.format(today)
     val currentMinute = minuteFormat.format(today)
@@ -99,6 +99,7 @@ object ScheduleHelper {
     val currentClassNumber = getClassNumber(0)
     val schedule = getScheduleData
 
+    print(currentClassNumber)
     if (currentDay == 6 || currentClassNumber >= 6 || currentClassNumber == -1) {
       return noLessonsMessage
     }
