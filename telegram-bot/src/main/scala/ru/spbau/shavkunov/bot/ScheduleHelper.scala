@@ -1,20 +1,25 @@
 package ru.spbau.shavkunov.bot
 
-import java.text.SimpleDateFormat
 import java.util
-import java.util.{Calendar, Date}
 
 import org.boon.json.JsonFactory
-import org.boon.json.ObjectMapper
 
-import scala.collection.mutable
-import scala.collection.parallel.immutable
-
+/**
+  * Object that provides desirable commands
+  */
 object ScheduleHelper {
   val noLessonsMessage = "Расслабься, сейчас нет пары :)"
+
+  /**
+    * Link to google sheet with schedule
+    */
   val scheduleSpreadsheetId = "1aKnrG37vTZw6xyiHV4NJ0ZMeUU1sy0f2hTOHNEQFDGo"
   val apiKey: String = GoogleKey.apiKey
 
+  /**
+    * Download schedule as json
+    * @return our schedule as json
+    */
   def getScheduleData: String = {
     val sheetUrl = s"https://sheets.googleapis.com/v4/spreadsheets/" +
                    s"$scheduleSpreadsheetId/values/Schedule302!B4:G9?key=$apiKey"
@@ -23,66 +28,32 @@ object ScheduleHelper {
     return json
   }
 
-  def getCurrentTime(): String = {
-    val today = Calendar.getInstance().getTime // TODO: 24 часовой формат
-    val minuteFormat = new SimpleDateFormat("MM")
-    val hourFormat = new SimpleDateFormat("HH")
-
-    val currentHour = hourFormat.format(today)
-    val currentMinute = minuteFormat.format(today)
-
-    return s"$currentHour:$currentMinute"
-  }
-
-  def getDayOfWeek(shift: Int): Int = {
-    val today = Calendar.getInstance().getTime
-    val dayFormat = new SimpleDateFormat("EEEE")
-
-    var day = 0
-    dayFormat.format(today) match {
-      case "Monday" => day = 0
-      case "Tuesday" => day = 1
-      case "Wednesday" => day = 2
-      case "Thursday" => day = 3
-      case "Friday" => day = 4
-      case "Saturday" => day = 5
-      case _ => day = 6
-    }
-
-    var result = (day + shift) % 7
-
-    if (result == 6 && shift > 0) {
-      result = 0
-    }
-
-    return result
-  }
-
-  def getTimeInSeconds(time: String): Int = {
-    val creationTime = time.toString.split(':')
-    val creationSeconds = creationTime(0).toInt*3600 + creationTime(1).toInt*60
-
-    return creationSeconds
-  }
-
-  def getClassNumber(shift: Int): Int = {
-    val time = getCurrentTime()
+  /**
+    * Identifying the order of current class
+    * @return order of current class
+    */
+  def getCurrentClassNumber(): Int = {
+    val time = TimeParser.getCurrentTime()
 
     var currentClassNumber = -1
     for (lessonTime <- TimeTable.getTiming().keys) {
-      val currentSeconds = getTimeInSeconds(time)
+      val currentSeconds = TimeParser.getTimeInSeconds(time)
       if (currentSeconds >= lessonTime) {
         currentClassNumber = TimeTable.getTiming()(lessonTime)
       }
     }
 
-    return currentClassNumber + shift
+    return currentClassNumber
   }
 
-
+  /**
+    * Get row specified by day. If shift parameter set to zero then method will return current day timetable.
+    * Otherwise, timetable of "shifted" day. If shift is set to one, then returns next day and so on.
+    * @param shift shift parameter
+    * @return specified timetable
+    */
   def getDay(shift: Int): util.List[Any] = {
-    val currentDay = getDayOfWeek(shift)
-    val currentClassNumber = getClassNumber(0)
+    val currentDay = TimeParser.getDayOfWeek(shift)
     val schedule = getScheduleData
 
     val mapper = JsonFactory.create
@@ -94,17 +65,24 @@ object ScheduleHelper {
     return currentDayJson
   }
 
+  /**
+    * Getting current class name or message that now there is no lessons
+    * @return current class name
+    */
   def getCurrentClass(): String = {
-    val currentDay = getDayOfWeek(0)
-    val currentClassNumber = getClassNumber(0)
-    val schedule = getScheduleData
+    val currentDay = TimeParser.getDayOfWeek(0)
+    val currentClassNumber = getCurrentClassNumber()
 
-    print(currentClassNumber)
-    if (currentDay == 6 || currentClassNumber >= 6 || currentClassNumber == -1) {
+    val currentDayJson: util.List[Any] = getDay(0)
+
+    if (currentClassNumber < currentDayJson.size() || currentClassNumber >= currentDayJson.size()) {
       return noLessonsMessage
     }
 
-    val currentDayJson: util.List[Any] = getDay(0)
+    if (currentDay == 7) {
+      return noLessonsMessage
+    }
+
     val currentClass = currentDayJson.get(currentClassNumber).asInstanceOf[String]
 
     if (currentClass == "") {
@@ -114,10 +92,13 @@ object ScheduleHelper {
     return currentClass
   }
 
+  /**
+    * Getting next class name
+    * @return next class name
+    */
   def getNextClass(): String = {
-    val currentDay = getDayOfWeek(0)
-    val currentClassNumber = getClassNumber(0)
-    val schedule = getScheduleData
+    val currentDay = TimeParser.getDayOfWeek(0)
+    val currentClassNumber = getCurrentClassNumber()
 
     val currentDayJson: util.List[Any] = getDay(0)
 
