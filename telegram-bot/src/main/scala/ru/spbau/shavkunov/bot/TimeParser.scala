@@ -44,16 +44,21 @@ object TimeParser {
       case "Thursday" => day = 3
       case "Friday" => day = 4
       case "Saturday" => day = 5
-      case _ => day = 6
     }
 
-    var result = (day + shift + 7) % 7
+    return getDay(day, shift)
+  }
 
-    if (result == 6 && shift > 0) {
-      result = 0
-    }
-
-    return result
+  /**
+    * Seems, that we want to have enum for day. But this is just another class with same methods and same logic.
+    * So, i decided to leave it here. Only 6 days in schedule(see url)
+    * Get day with shift
+    * @param day day
+    * @param shift shift parameter
+    * @return desirable day
+    */
+  def getDay(day: Int, shift: Int): Int = {
+    return (day + shift + 6) % 6
   }
 
   /**

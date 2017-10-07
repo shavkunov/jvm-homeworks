@@ -17,8 +17,8 @@ object ScheduleHelper {
   val apiKey: String = GoogleKey.apiKey
 
   /**
-    * Download schedule as json
-    * @return our schedule as json
+    * Download json schedule as string
+    * @return our schedule as string
     */
   def getScheduleData: String = {
     val sheetUrl = s"https://sheets.googleapis.com/v4/spreadsheets/" +
@@ -52,34 +52,28 @@ object ScheduleHelper {
     * @param shift shift parameter
     * @return specified timetable
     */
-  def getDay(shift: Int): util.List[Any] = {
-    val currentDay = TimeParser.getDayOfWeek(shift)
+  def getDay(day: Int, shift: Int): util.List[Any] = {
     val schedule = getScheduleData
 
     val mapper = JsonFactory.create
     val json: util.Map[String, Any] = mapper.fromJson(schedule).asInstanceOf[util.Map[String, Any]]
     val values: util.List[Any] = json.get("values").asInstanceOf[util.List[Any]]
 
-    val currentDayJson: util.List[Any] = values.get(currentDay).asInstanceOf[util.List[Any]]
+    val dayJson: util.List[Any] = values.get(TimeParser.getDay(day, shift)).asInstanceOf[util.List[Any]]
 
-    return currentDayJson
+    return dayJson
   }
 
   /**
-    * Getting current class name or message that now there is no lessons
-    * @return current class name
+    * Same as getCurrentClass but with explicit parameters
+    * @param currentDay current day
+    * @param currentClassNumber current order of class
+    * @return class name
     */
-  def getCurrentClass(): String = {
-    val currentDay = TimeParser.getDayOfWeek(0)
-    val currentClassNumber = getCurrentClassNumber()
+  def getCurrentClass(currentDay: Int, currentClassNumber: Int): String = {
+    val currentDayJson: util.List[Any] = getDay(currentDay, 0)
 
-    val currentDayJson: util.List[Any] = getDay(0)
-
-    if (currentClassNumber < currentDayJson.size() || currentClassNumber >= currentDayJson.size()) {
-      return noLessonsMessage
-    }
-
-    if (currentDay == 7) {
+    if (currentClassNumber < 0 || currentClassNumber >= currentDayJson.size()) {
       return noLessonsMessage
     }
 
@@ -93,6 +87,49 @@ object ScheduleHelper {
   }
 
   /**
+    * Getting current class name or message that now there is no lessons
+    * @return current class name
+    */
+  def getCurrentClass(): String = {
+    val currentDay = TimeParser.getDayOfWeek(0)
+    val currentClassNumber = getCurrentClassNumber()
+
+    return getCurrentClass(currentDay, currentClassNumber)
+  }
+
+  /**
+    * Same as getNextClass but with explicit parameters
+    * @param currentDay current day
+    * @param currentClassNumber current order of class
+    * @return class name
+    */
+  def getNextClass(currentDay: Int, currentClassNumber: Int): String = {
+    val currentDayJson: util.List[Any] = getDay(currentDay, 0)
+
+    var nextClass = ""
+    if (currentClassNumber + 1 < currentDayJson.size) {
+      return currentDayJson.stream
+                           .skip(currentClassNumber + 1)
+                           .filter(obj => !obj.asInstanceOf[String].equals(""))
+                           .findFirst
+                           .get
+                           .asInstanceOf[String]
+    }
+
+    if (currentClassNumber + 1 >= currentDayJson.size) {
+      var nextDayJson: util.List[Any] = getDay(currentDay, 1)
+
+      nextClass = nextDayJson.stream
+        .filter(obj => !obj.asInstanceOf[String].equals(""))
+        .findFirst
+        .get
+        .asInstanceOf[String]
+    }
+
+    return nextClass
+  }
+
+  /**
     * Getting next class name
     * @return next class name
     */
@@ -100,27 +137,6 @@ object ScheduleHelper {
     val currentDay = TimeParser.getDayOfWeek(0)
     val currentClassNumber = getCurrentClassNumber()
 
-    val currentDayJson: util.List[Any] = getDay(0)
-
-    var nextClass = ""
-    if (currentClassNumber + 1 < currentDayJson.size) {
-      return currentDayJson.get(currentClassNumber + 1).asInstanceOf[String]
-    }
-
-    if (currentDay == 6 || currentClassNumber + 1 >= currentDayJson.size) {
-      var nextDayJson: util.List[Any] = getDay(1)
-
-      if (currentDay == 5 || currentClassNumber + 1 >= currentDayJson.size) {
-        nextDayJson = getDay(2)
-      }
-
-      nextClass = nextDayJson.stream
-                             .filter(obj => !obj.asInstanceOf[String].equals(""))
-                             .findFirst
-                             .get
-                             .asInstanceOf[String]
-    }
-
-    return nextClass
+    getNextClass(currentDay, currentClassNumber)
   }
 }
