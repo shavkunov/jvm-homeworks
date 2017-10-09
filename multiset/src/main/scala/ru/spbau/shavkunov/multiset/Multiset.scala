@@ -9,35 +9,16 @@ class Multiset[T](elements: T*) {
 
   def size = hashMap.size
 
-  def add(element: T) = {
-    val amount = hashMap.getOrElse(element, 0)
+  def add(element: T, count: Int = 1) =
+    hashMap.update(element, this.count(element) + count)
 
-    if (amount != 0) {
-      hashMap -= element
-    }
+  def asSeq(): Seq[T] =
+    hashMap.keys.toList.flatMap(element => List.fill(hashMap(element))(element))
 
-    hashMap += ((element, amount + 1))
-  }
+  def filter(pred: T => Boolean): Multiset[T] =
+    new Multiset(asSeq().filter(pred): _*)
 
-  def delete(element: T) = {
-    if (hashMap.contains(element)) {
-      val amount = hashMap(element)
-
-      hashMap -= element
-
-      if (amount != 1) {
-        hashMap += ((element, amount - 1))
-      }
-    }
-  }
-
-  def asSeq(): Seq[T] = {
-    return hashMap.keys.flatMap(element => List.fill(hashMap(element))(element)).toList
-  }
-
-  def filter(pred: T => Boolean): Multiset[T] = {
-    return new Multiset(asSeq().filter(pred): _*)
-  }
+  def withFilter(pred: (T) => Boolean): Multiset[T] = filter(pred)
 
   def find(element: T): Option[T] = {
     if (hashMap.contains(element)) {
@@ -47,40 +28,49 @@ class Multiset[T](elements: T*) {
     }
   }
 
-  def contains(element: T): Boolean = {
-    find(element).isDefined
-  }
+  def contains(element: T): Boolean = find(element).isDefined
 
-  def map[B](fun: T => B): Multiset[B] = {
-    return new Multiset(asSeq().map(fun): _*)
-  }
+  def map[B](fun: T => B): Multiset[B] =
+    new Multiset(asSeq().map(fun): _*)
 
-  def flatmap[B](fun: T => GenTraversableOnce[B]): Multiset[B] = {
-    return new Multiset(asSeq().flatMap(fun): _*)
-  }
+  def flatMap[B](fun: T => GenTraversableOnce[B]): Multiset[B] =
+    new Multiset(asSeq().flatMap(fun): _*)
 
-  def count(element: T) = hashMap(element)
+  def count(element: T): Int = hashMap.getOrElse(element, 0)
 
-  def apply(element: T) = count(element)
+  def apply(element: T): Int = count(element)
 
-  private def setOperation(anotherMultiset: Multiset[T], operation: (Int, Int) => Int): Multiset[T] = {
-    val list = hashMap.keys.filter(element => anotherMultiset.contains(element)).flatMap(element => {
+  def &(anotherMultiset: Multiset[T]): Multiset[T] = {
+    val list = hashMap.keys.toList.filter(element => anotherMultiset.contains(element)).flatMap(element => {
       val firstCount: Int = count(element)
       val secondCount: Int = anotherMultiset.count(element)
-      val intersection = operation(firstCount, secondCount)
+      val intersection = Math.min(firstCount, secondCount)
 
       List.fill(intersection)(element)
-    }).toList
+    })
 
     return new Multiset(list: _*)
   }
 
-  def &(anotherMultiset: Multiset[T]) = setOperation(anotherMultiset, Math.min)
+  def |(anotherMultiset: Multiset[T]): Multiset[T] = {
+    val result = new Multiset[T](asSeq(): _*)
 
-  def |(anotherMultiset: Multiset[T]) = setOperation(anotherMultiset, Math.max)
+    for ((element, count) <- anotherMultiset.hashMap) {
+      result.add(element, count)
+    }
+
+    return result
+  }
+
+  override def equals(that: scala.Any): Boolean = {
+    that match {
+      case that: Multiset[T] => hashMap == that.hashMap
+      case _ => false
+    }
+  }
 }
 
-object MultiSet {
+object Multiset {
   def unapplySeq[T](multiset: Multiset[T]): Option[Seq[T]] = Some(multiset.asSeq())
 
   def *[T](multiset: Multiset[T]): Option[Seq[T]] = unapplySeq(multiset)
